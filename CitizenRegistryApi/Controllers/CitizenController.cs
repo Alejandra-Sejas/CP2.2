@@ -71,6 +71,31 @@ public class CitizenController : ControllerBase
             return StatusCode(500, new { message = ex.Message });
         }
     }
+    
+    [HttpPut("{ci}")]
+    public IActionResult Update(string ci, [FromBody] UpdateCitizen request)
+    {
+        try
+        {
+            Citizen? citizen = _citizens.FirstOrDefault(c => c.CI == ci);
+
+            if (citizen == null)
+            {
+                return NotFound(new { message = "Citizen not found" });
+            }
+
+            citizen.FirstName = request.FirstName;
+            citizen.LastName = request.LastName;
+
+            SaveCitizens();
+
+            return Ok(citizen);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
 
     private List<Citizen> LoadCitizens()
     {
