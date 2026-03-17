@@ -1,6 +1,6 @@
 namespace CitizenRegistryApi.Dtos;
 
-public class CreateRequest
+public class CreateCitizen
 {
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;

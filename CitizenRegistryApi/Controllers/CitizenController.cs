@@ -1,6 +1,8 @@
-using Microsoft.AspNetCore.Mvc;
+using CitizenRegistryApi.Dtos;
 using CitizenRegistryApi.Models;
+using CitizenRegistryApi.Services;
 using CitizenRegistryApi.Utils;
+using Microsoft.AspNetCore.Mvc;
 
 namespace CitizenRegistryApi.Controllers;
 
@@ -9,11 +11,13 @@ namespace CitizenRegistryApi.Controllers;
 public class CitizenController : ControllerBase
 {
     private readonly IConfiguration _configuration;
+    private readonly ObjectService _objectService;
     private readonly List<Citizen> _citizens;
 
-    public CitizenController(IConfiguration configuration)
+    public CitizenController(IConfiguration configuration, ObjectService objectService)
     {
         _configuration = configuration;
+        _objectService = objectService;
         _citizens = LoadCitizens();
     }
 
@@ -36,9 +40,47 @@ public class CitizenController : ControllerBase
         return Ok(citizen);
     }
 
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] CreateCitizen request)
+    {
+        try
+        {
+            bool citizenExists = _citizens.Any(c => c.CI == request.CI);
+
+            if (citizenExists)
+            {
+                return BadRequest(new { message = "Citizen with this CI already exists" });
+            }
+
+            Citizen citizen = new Citizen
+            {
+                FirstName = request.FirstName,
+                LastName = request.LastName,
+                CI = request.CI,
+                BloodGroup = GetRandomBloodGroup(),
+                PersonalAsset = await _objectService.GetRandomObjectName()
+            };
+
+            _citizens.Add(citizen);
+            SaveCitizens();
+
+            return CreatedAtAction(nameof(GetByCi), new { ci = citizen.CI }, citizen);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
+
     private List<Citizen> LoadCitizens()
     {
-        var filePath = _configuration["Data:Location"] ?? "CitizensData.csv";
+        string? filePath = _configuration["Data:Location"];
+
+        if (string.IsNullOrWhiteSpace(filePath))
+        {
+            filePath = "CitizensData.csv";
+        }
+
         var data = CsvHelper.ReadCsv(filePath);
         var citizens = new List<Citizen>();
 
@@ -49,7 +91,7 @@ public class CitizenController : ControllerBase
                 continue;
             }
 
-            var citizen = new Citizen
+            Citizen citizen = new Citizen
             {
                 FirstName = data[i][0],
                 LastName = data[i][1],
@@ -62,5 +104,37 @@ public class CitizenController : ControllerBase
         }
 
         return citizens;
+    }
+
+    private void SaveCitizens()
+    {
+        string? filePath = _configuration["Data:Location"];
+
+        if (string.IsNullOrWhiteSpace(filePath))
+        {
+            filePath = "CitizensData.csv";
+        }
+
+        var data = _citizens.Select(c => new[]
+        {
+            c.FirstName,
+            c.LastName,
+            c.CI,
+            c.BloodGroup,
+            c.PersonalAsset
+        }).ToList();
+
+        CsvHelper.WriteCsv(filePath, data);
+    }
+
+    private static string GetRandomBloodGroup()
+    {
+        string[] bloodGroups =
+        {
+            "A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"
+        };
+
+        int randomIndex = Random.Shared.Next(bloodGroups.Length);
+        return bloodGroups[randomIndex];
     }
 }
