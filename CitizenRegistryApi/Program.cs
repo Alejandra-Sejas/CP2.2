@@ -1,13 +1,12 @@
 using CitizenRegistryApi.Services;
 var builder = WebApplication.CreateBuilder(args);
 
-// OpenAPI nativo de .NET
 builder.Services.AddOpenApi();
 
-// Soporte para controladores
 builder.Services.AddControllers();
 
-// Swagger UI
+//swagger 
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<ObjectService>();

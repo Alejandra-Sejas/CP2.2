@@ -71,7 +71,7 @@ public class CitizenController : ControllerBase
             return StatusCode(500, new { message = ex.Message });
         }
     }
-    
+
     [HttpPut("{ci}")]
     public IActionResult Update(string ci, [FromBody] UpdateCitizen request)
     {
@@ -90,6 +90,28 @@ public class CitizenController : ControllerBase
             SaveCitizens();
 
             return Ok(citizen);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
+    [HttpDelete("{ci}")]
+    public IActionResult Delete(string ci)
+    {
+        try
+        {
+            Citizen? citizen = _citizens.FirstOrDefault(c => c.CI == ci);
+
+            if (citizen == null)
+            {
+                return NotFound(new { message = "Citizen not found" });
+            }
+
+            _citizens.Remove(citizen);
+            SaveCitizens();
+
+            return Ok(new { message = "Citizen deleted successfully" });
         }
         catch (Exception ex)
         {
