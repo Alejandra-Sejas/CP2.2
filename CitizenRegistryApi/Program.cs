@@ -1,34 +1,52 @@
 using CitizenRegistryApi.Services;
-var builder = WebApplication.CreateBuilder(args);
+using Serilog;
 
-builder.Services.AddOpenApi();
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .WriteTo.Console()
+    .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
 
-builder.Services.AddControllers();
-
-//swagger 
-
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddScoped<ObjectService>();
-
-var app = builder.Build();
-
-if (app.Environment.IsDevelopment())
+try
 {
-    app.MapOpenApi();
+    Log.Information("Starting CitizenRegistryApi");
 
-    app.UseSwagger();
+    var builder = WebApplication.CreateBuilder(args);
 
-    app.UseSwaggerUI(options =>
+    builder.Host.UseSerilog();
+
+    builder.Services.AddOpenApi();
+    builder.Services.AddControllers();
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen();
+
+    builder.Services.AddScoped<ObjectService>();
+
+    var app = builder.Build();
+
+    if (app.Environment.IsDevelopment())
     {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Citizen Registry API v1");
-    });
+        app.MapOpenApi();
+
+        app.UseSwagger();
+
+        app.UseSwaggerUI(options =>
+        {
+            options.SwaggerEndpoint("/swagger/v1/swagger.json", "API de registro ciudadano v1");
+        });
+    }
+
+    app.UseHttpsRedirection();
+    app.UseAuthorization();
+    app.MapControllers();
+
+    app.Run();
 }
-
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
