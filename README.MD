@@ -24,6 +24,7 @@ Al momento de crear un ciudadano, el sistema:
 
 - 🎲 Asigna automáticamente un grupo sanguíneo aleatorio
 - 🌐 Obtiene un objeto aleatorio desde una API externa para usarlo como `PersonalAsset`
+
 ## ✅ Funcionalidades principales
 
 Este proyecto permite:
@@ -93,18 +94,21 @@ Todo el desarrollo estuvo centralizado en un único repositorio, organizado medi
 2. Dependencies
 Las dependencias del proyecto están declaradas de forma explícita mediante paquetes NuGet.
 Entre las principales están:
-- Swashbuckle.AspNetCore
-- Newtonsoft.Json
-- Serilog.AspNetCore
-- Serilog.Sinks.Console
-- Serilog.Sinks.File
+- `Swashbuckle.AspNetCore`
+- `Newtonsoft.Json`
+- `Serilog.AspNetCore`
+- `Serilog.Sinks.Console`
+- `Serilog.Sinks.File`
+
 Esto facilita restaurar el proyecto en otra máquina sin depender de instalaciones manuales.
 
 3. Config
 La configuración del proyecto no está escrita directamente en la lógica del código.
 Se maneja mediante appsettings.json, por ejemplo para:
+
 - la ruta del archivo CSV
 - la URL base de la API externa
+
 Esto permite cambiar valores de configuración sin modificar el código fuente.
 
 4. Processes
@@ -113,6 +117,7 @@ La aplicación funciona como un proceso stateless, asyns/await.
 Cada solicitud HTTP se procesa de forma independiente.
 Aunque temporalmente se cargan datos en memoria al trabajar con la lista de ciudadanos, la persistencia real se mantiene en el archivo CSV, por lo que la aplicación no depende únicamente del estado en memoria para conservar datos.
 Como posible mejora, podrían existir otros procesos como:
+
 - procesos administrativos para limpiar o cargar datos
 - procesos en segundo plano para tareas más largas
 
@@ -165,17 +170,17 @@ Esas tareas podrían ejecutarse como procesos puntuales fuera del flujo normal d
 
 📮 Endpoints principales
 
-GET /Citizen
+`GET /Citizen`
 Obtiene la lista de todos los ciudadanos registrados.
 
-GET /Citizen/{ci}
+`GET /Citizen/{ci}`
 Obtiene un ciudadano específico según su CI.
 
-POST /Citizen
+`POST /Citizen`
 Crea un nuevo ciudadano.
 
-PUT /Citizen/{ci}
+`PUT /Citizen/{ci}`
 Actualiza el nombre y apellido de un ciudadano existente.
 
-DELETE /Citizen/{ci}
+`DELETE /Citizen/{ci}`
 Elimina un ciudadano por su CI.
