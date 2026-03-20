@@ -117,19 +117,21 @@ Como posible mejora, podrían existir otros procesos como:
 - procesos en segundo plano para tareas más largas
 
 5. Build, Release, Run
+
 Mantuve separadas las etapas de construcción y ejecución con comandos como:
 - dotnet build
 - dotnet run
 
 
 6. Backing Services
+
 La API externa de objetos funciona como un servicio adjunto al proyecto.
 La aplicación la consume como un recurso externo y no como algo embebido dentro del código.
 
 7. Port Binding
+
 La API se expone directamente mediante un puerto, por ejemplo:
 http://localhost:5082
-
 Eso permite que el servicio responda solicitudes HTTP de forma directa.
 
 8. Concurrency
@@ -162,6 +164,7 @@ No implementé procesos administrativos separados como comandos independientes, 
 Esas tareas podrían ejecutarse como procesos puntuales fuera del flujo normal de la API.
 
 📮 Endpoints principales
+
 GET /Citizen
 Obtiene la lista de todos los ciudadanos registrados.
 
